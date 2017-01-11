@@ -5,7 +5,7 @@
       <author>shadowninja108</author>
       <version>1</version>
       <binaryversion>1</binaryversion>
-      <updatesite />
+      <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
    </general>
    <downloads>
       <global>
