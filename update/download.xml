@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+   <general>
+      <name>Test File</name>
+      <author>shadowninja108</author>
+      <version>1</version>
+      <binaryversion>1</binaryversion>
+      <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
+   </general>
+   <downloads>
+      <global>
+        <link type="zip">
+			<value>http://smealum.github.io/ninjhax2/starter.zip</value>
+			<path>/</path>
+			<extract>starter/</extract>
+		</link>
+		<link type = "direct">
+				<value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-n3ds.m4a?raw=true</value>
+				<path>soundhax.m4a</path>
+		</link>
+		<link type = "direct">
+			<value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.3dsx</value>
+			<path>3ds/safehax/safehax.3dsx</path>
+		</link>
+		<link type = "direct">
+			<value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.3dsx</value>
+			<path>3ds/safehax/safehax.smdh</path>
+		</link>
+		<link type = "direct">
+			<value>https://github.com/nedwill/fasthax/releases/download/v1.0.1/fasthax.3dsx</value>
+			<path>3ds/fasthax/fasthax.3dsx</path>
+		</link>
+		<link type = "zip">
+			<value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
+			<path>safehaxpayload.bin</path>
+			<extract>Decrypt9WIP.bin</extract>
+		</link>
+		<link type="7zip">
+			<value>https://github.com/AuroraWright/Luma3DS/releases/download/v6.6/Luma3DSv6.6.7z</value>
+			<path>hax/arm9loaderhax.bin</path>
+			<extract>arm9loaderhax.bin</extract>
+		</link>
+      </global>
+      <if type="NEW" region="USA">     
+         <command>        
+            <link type = "direct">
+				<value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-n3ds.m4a?raw=true</value>
+				<path>soundhax.m4a</path>
+			</link>
+         </command>
+      </if>
+   </downloads>
+</root>
