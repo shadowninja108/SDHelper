@@ -1,5 +1,9 @@
 # SDHelper
 A 3DS hax install helper
+
+# What is this?
+This tool allows for automatic downloading of installer files. An XML file defines what to download and puts it all in one directory. This can be used for even quicker A9LH installations, as it would download all the files, all at once. All you would do is press start, then copy all the files to your SD card (theoretically). That's it.
+
 # How To Use
 * Put download.xml in the same directory as the jar file. Example in this repo (update/download.xml)
 * Open jar
