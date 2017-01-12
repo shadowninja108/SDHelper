@@ -1,7 +1,11 @@
 # SDHelper
 A 3DS hax install helper
 # How To Use
- * Put download.xml in the same directory as the jar file. Example in this repo (update/download.xml)
+* Put download.xml in the same directory as the jar file. Example in this repo (update/download.xml)
+* Open jar
+* Enter your 3DS info
+* Press start
+* All files will be in /SDHelper/sd
 
 # Features
  * XML based download configurations
