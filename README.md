@@ -32,4 +32,4 @@ A 3DS hax install helper
   * XML picker (not hardcoded path)
   * Maybe progress bar be the total progress and not progress of current file?
   
- * Naitive support for torrents
+* Naitive support for torrents
