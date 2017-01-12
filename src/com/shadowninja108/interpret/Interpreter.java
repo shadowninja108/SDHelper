@@ -253,71 +253,45 @@ public class Interpreter {
 	}
 
 	public void decompress7z(Element node, ExtractionTag tag) {
-		String web = node.getChildText("value");
-		String path = web.substring(web.lastIndexOf("/") + 1, web.lastIndexOf("."));
-		File filePath = new File(download, path + ".7z");
-		File folderPath = Paths.get(download.toString(), path).toFile();
-		if ((tag != null && !tag.completed) || (folderPath.exists()) && Frame.sevenZipEnabled) {
-			folderPath.mkdir();
-			File source = new File(download, path + "\\" + node.getChildText("extract"));
-			if (!source.exists())
-				UnZipper.un7zip(filePath, new File(download, path).toPath());
-			File destination = null;
-			if (source.isFile()) {
-				destination = new File(sd, node.getChildText("path"));
-				try {
-					destination.mkdirs();
-					destination.createNewFile();
-					Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			} else {
-				File dest;
-				if (!node.getChildText("path").equals("/"))
-					dest = new File(sd, node.getChildText("path"));
-				else
-					dest = sd;
-				try {
-					Files.walkFileTree(source.toPath(), new SimpleFileVisitor<Path>() {
-						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-							return copy(file);
-						}
-
-						private FileVisitResult copy(Path fileOrDir) throws IOException {
-							Path finl = dest.toPath().resolve(source.toPath().relativize(fileOrDir));
-							// get around exceptions
-							finl.toFile().mkdirs();
-							Files.move(fileOrDir, dest.toPath().resolve(source.toPath().relativize(fileOrDir)),
-									StandardCopyOption.REPLACE_EXISTING);
-							return FileVisitResult.CONTINUE;
-						}
-					});
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		if (!Frame.sevenZipEnabled) {
-			System.out.println("Skipped 7z because of the inability to extract it");
-		} else {
-			try {
-				filePath.createNewFile();
-			} catch (IOException e) {
-				System.out.println("Error!");
-			}
-			ExtractionTag ntag = new ExtractionTag();
-			try {
-				ntag.m = this.getClass().getMethod("decompress7z",
-						new Class<?>[] { Element.class, ExtractionTag.class });
-			} catch (NoSuchMethodException | SecurityException e) {
-				e.printStackTrace();
-			}
-			ntag.completed = false;
-			ntag.node = node;
-			ntag.interpreter = this;
-			downManager.download(web, "/download/" + path + ".zip", ntag);
-		}
+		System.out.println("7zip support unimplimented! Skipping...");
+		/*
+		 * String web = node.getChildText("value"); String path =
+		 * web.substring(web.lastIndexOf("/") + 1, web.lastIndexOf(".")); File
+		 * filePath = new File(download, path + ".7z"); File folderPath =
+		 * Paths.get(download.toString(), path).toFile(); if ((tag != null &&
+		 * !tag.completed) || (folderPath.exists()) && Frame.sevenZipEnabled) {
+		 * folderPath.mkdir(); File source = new File(download, path +
+		 * "\\" + node.getChildText("extract")); if (!source.exists())
+		 * UnZipper.un7zip(filePath, new File(download, path).toPath()); File
+		 * destination = null; if (source.isFile()) { destination = new File(sd,
+		 * node.getChildText("path")); try { destination.mkdirs();
+		 * destination.createNewFile(); Files.copy(source.toPath(),
+		 * destination.toPath(), StandardCopyOption.REPLACE_EXISTING); } catch
+		 * (IOException e) { e.printStackTrace(); } } else { File dest; if
+		 * (!node.getChildText("path").equals("/")) dest = new File(sd,
+		 * node.getChildText("path")); else dest = sd; try {
+		 * Files.walkFileTree(source.toPath(), new SimpleFileVisitor<Path>() {
+		 * public FileVisitResult visitFile(Path file, BasicFileAttributes
+		 * attrs) throws IOException { return copy(file); }
+		 * 
+		 * private FileVisitResult copy(Path fileOrDir) throws IOException {
+		 * Path finl =
+		 * dest.toPath().resolve(source.toPath().relativize(fileOrDir)); // get
+		 * around exceptions finl.toFile().mkdirs(); Files.move(fileOrDir,
+		 * dest.toPath().resolve(source.toPath().relativize(fileOrDir)),
+		 * StandardCopyOption.REPLACE_EXISTING); return
+		 * FileVisitResult.CONTINUE; } }); } catch (IOException e) {
+		 * e.printStackTrace(); } } } if (!Frame.sevenZipEnabled) { System.out.
+		 * println("Skipped 7z because of the inability to extract it"); } else
+		 * { try { filePath.createNewFile(); } catch (IOException e) {
+		 * System.out.println("Error!"); } ExtractionTag ntag = new
+		 * ExtractionTag(); try { ntag.m =
+		 * this.getClass().getMethod("decompress7z", new Class<?>[] {
+		 * Element.class, ExtractionTag.class }); } catch (NoSuchMethodException
+		 * | SecurityException e) { e.printStackTrace(); } ntag.completed =
+		 * false; ntag.node = node; ntag.interpreter = this;
+		 * downManager.download(web, "/download/" + path + ".zip", ntag); }
+		 */
 	}
 
 	public void directDownload(Element node) {
