@@ -1,1 +1,9 @@
 .git .settings 7zip bin jdom SDHelper .classpath .project download.xml
+bin/
+jdom/
+SDHelper/
+download.xml
+7zip/
+.settings/
+.classpath
+.project
