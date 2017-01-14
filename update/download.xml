@@ -3,8 +3,8 @@
    <general>
       <name>Test File</name>
       <author>shadowninja108</author>
-      <version>1</version>
-      <binaryversion>1</binaryversion>
+      <version>2</version>
+      <binaryversion>2</binaryversion>
       <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
    </general>
    <downloads>
@@ -23,7 +23,7 @@
 			<path>3ds/safehax/safehax.3dsx</path>
 		</link>
 		<link type = "direct">
-			<value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.3dsx</value>
+			<value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.smdh</value>
 			<path>3ds/safehax/safehax.smdh</path>
 		</link>
 		<link type = "direct">
