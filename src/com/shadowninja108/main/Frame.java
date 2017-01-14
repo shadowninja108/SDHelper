@@ -96,7 +96,7 @@ public class Frame extends JFrame {
 		Path xml = new File(working_directory, "download.xml").toPath();
 		try {
 			if (Files.exists(xml)) {
-				File downloadXml = new File(working_directory, "downloads.xml");
+				File downloadXml = new File(working_directory, "download.xml");
 				File updateXml = new File(working_directory, "update.xml");
 				if (updateXml.exists())
 					updateXml.delete();
@@ -136,6 +136,7 @@ public class Frame extends JFrame {
 								while (!nhandle.isComplete())
 									Thread.sleep(10);
 								updateXml.delete();
+								System.out.println("Update complete!");
 							}
 						} else
 							System.out.println("Up to date.");
