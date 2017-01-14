@@ -9,13 +9,13 @@ public class ConsoleInfo {
 	public ConsoleInfo() {
 		ver = new ver();
 	}
-	
+
 	public class ver {
 		public int major, minor, patch, idk;
 	}
 
 	public enum region {
-		USA, EUR, JPN // more support?
+		USA, EUR, JPN, KOR, TWN
 	}
 
 	public enum type {

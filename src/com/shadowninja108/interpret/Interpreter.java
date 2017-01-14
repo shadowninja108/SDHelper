@@ -8,15 +8,12 @@ import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-
-import javax.swing.JOptionPane;
 
 import org.jdom2.Attribute;
 import org.jdom2.Document;
@@ -35,7 +32,7 @@ public class Interpreter {
 	public static File root, download, sd;
 
 	public static void setup() {
-		root = new File(System.getProperty("user.dir") + "/SDHelper");
+		root = new File(Frame.working_directory, "SDHelper");
 		if (!root.exists())
 			root.mkdir();
 		download = new File(root, "download");
@@ -73,17 +70,14 @@ public class Interpreter {
 		try {
 			doc = builder.build(xml);
 		} catch (JDOMException | IOException e) {
-			System.out.println("Error reading" + xml.getPath().substring(xml.getPath().lastIndexOf("/") + 1));
+			System.out
+					.println("Error reading" + xml.getPath().substring(xml.getPath().lastIndexOf(File.separator) + 1));
 			e.printStackTrace();
 		}
 
 		rootNode = doc.getRootElement();
 		general = rootNode.getChild("general");
 		downloads = rootNode.getChild("downloads");
-
-		if (Integer.valueOf(general.getChildText("binaryversion")) > Frame.binary_version)
-			JOptionPane.showMessageDialog(null,
-					"Warning! XML file was built after this build! Features used by this XML could be unimplemented!");
 		version = Integer.valueOf(general.getChildText("version"));
 	}
 
@@ -188,48 +182,53 @@ public class Interpreter {
 	}
 
 	public void decompressZip(Element node, ExtractionTag tag) {
-		String web = node.getChildText("value");
-		String path = web.substring(web.lastIndexOf("/") + 1, web.lastIndexOf("."));
-		File filePath = new File(download, path + ".zip");
-		File folderPath = Paths.get(download.toString(), path).toFile();
-		if ((tag != null && !tag.completed) || (folderPath.exists())) {
-			folderPath.mkdir();
-			File source = new File(download, path + "\\" + node.getChildText("extract"));
+		String webSite = node.getChildText("value");
+		String path = node.getChildText("path");
+		String extract = node.getChildText("extract");
+		String srcName = webSite.substring(webSite.lastIndexOf("/") + 1, webSite.lastIndexOf("."));
+		File filePath = new File(download, srcName + ".zip");
+		File rootFolderPath = new File(download, srcName);
+		File extractPath = (!extract.equals("/")) ? sd : new File(sd, extract);
+		if ((tag != null && !tag.completed) || (rootFolderPath.exists())) {
+			rootFolderPath.mkdir();
+			File source = new File(rootFolderPath, extract);
 			if (!source.exists())
-				UnZipper.unZip(filePath, new File(download, path).toPath());
+				UnZipper.unZip(filePath, rootFolderPath);
 			File destination = null;
 			if (source.isFile()) {
-				destination = new File(sd, node.getChildText("path"));
+				destination = new File(sd, path);
 				try {
 					destination.mkdirs();
 					destination.createNewFile();
 					Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
-					e.printStackTrace();
+					Frame.error("Failed to prepare/move " + source.getName());
 				}
 			} else {
-				File dest;
-				if (!node.getChildText("path").equals("/"))
-					dest = new File(sd, node.getChildText("path"));
+				if (!path.equals("/"))
+					destination = new File(sd, path);
 				else
-					dest = sd;
+					destination = sd;
 				try {
-					Files.walkFileTree(source.toPath(), new SimpleFileVisitor<Path>() {
+					final File fSrc = source;
+					final File fDest = extractPath;
+					// java 7 compatibility requires these to be final
+					Files.walkFileTree(fSrc.toPath(), new SimpleFileVisitor<Path>() {
 						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 							return copy(file);
 						}
 
 						private FileVisitResult copy(Path fileOrDir) throws IOException {
-							Path finl = dest.toPath().resolve(source.toPath().relativize(fileOrDir));
+							Path finl = fDest.toPath().resolve(fSrc.toPath().relativize(fileOrDir));
 							// get around exceptions
 							finl.toFile().mkdirs();
-							Files.move(fileOrDir, dest.toPath().resolve(source.toPath().relativize(fileOrDir)),
+							Files.move(fileOrDir, fDest.toPath().resolve(fSrc.toPath().relativize(fileOrDir)),
 									StandardCopyOption.REPLACE_EXISTING);
 							return FileVisitResult.CONTINUE;
 						}
 					});
 				} catch (IOException e) {
-					e.printStackTrace();
+					Frame.error("Failed to recursively move: " + extractPath.getName());
 				}
 			}
 		} else {
@@ -248,7 +247,7 @@ public class Interpreter {
 			ntag.completed = false;
 			ntag.node = node;
 			ntag.interpreter = this;
-			downManager.download(web, "/download/" + path + ".zip", ntag);
+			downManager.download(webSite, filePath, ntag);
 		}
 	}
 
@@ -295,14 +294,16 @@ public class Interpreter {
 	}
 
 	public void directDownload(Element node) {
-		downManager.download(node.getChild("value").getValue(), "/sd/" + node.getChild("path").getValue(), null);
+		String webSite = node.getChildText("value");
+		String path = node.getChildText("path");
+		downManager.download(webSite, new File(sd, path), null);
 	}
 
 	public void webLink(Element node) {
 		try {
 			Desktop.getDesktop().browse(new URI(node.getChildText("value")));
 		} catch (IOException | URISyntaxException e) {
-			System.out.println("Failed to open " + node.getChildText("value"));
+			Frame.error("Failed to open " + node.getChildText("value"));
 		}
 	}
 

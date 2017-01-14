@@ -1,11 +1,11 @@
 package com.shadowninja108.util;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import javax.swing.JOptionPane;
+import java.util.function.Consumer;
 
 import com.shadowninja108.main.Frame;
 
@@ -65,7 +65,7 @@ public class DownloadManager {
 		return true;
 	}
 
-	public void download(String web, String path, ExtractionTag tag) {
+	public void download(String web, File path, ExtractionTag tag) {
 		try {
 			toBeAdded.add(new DownloadHandle(new URL(web), path, tag));
 		} catch (MalformedURLException e) {
@@ -94,66 +94,63 @@ public class DownloadManager {
 		@Override
 		public void run() {
 			while (running) {
-				try {
-					Thread.sleep(10);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-				if (!getTBHandles().isEmpty() || !getHandles().isEmpty())
-					getTBHandles().forEach((handle) -> {
-						getHandles().add(handle);
-					});
-				getTBHandles().clear();
-				Iterator<DownloadHandle> it = getHandles().iterator();
-				int handledHandles = 0; // gr8 name
-				while (it.hasNext()) {
-					DownloadHandle handle = it.next();
-					URL url = handle.getURL();
-					String status = "Downloading: " + url.toString().substring(url.toString().lastIndexOf("/") + 1);
-					Frame.setStatus(status);
-					System.out.println("Downloading: " + url);
-					while (handle.getStatus() != DownloadHandle.COMPLETE
-							&& handle.getStatus() != DownloadHandle.ERROR) {
-						try {
-							Thread.sleep(10);
-							// lets try not to hog the entire cpu shall we
-						} catch (InterruptedException e) {
-							e.printStackTrace();
+				while (getHandles().size() > 0 || getTBHandles().size() > 0) {
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e1) {
+						Frame.error("Who interupted the thread?");
+					}
+
+					if (!getTBHandles().isEmpty() || !getHandles().isEmpty())
+						getTBHandles().forEach(new Consumer<DownloadHandle>() {
+							@Override
+							public void accept(DownloadHandle handle) {
+								getHandles().add(handle);
+							}
+						});
+					getTBHandles().clear();
+
+					Iterator<DownloadHandle> it = getHandles().iterator();
+					while (it.hasNext()) {
+						DownloadHandle handle = it.next();
+						URL url = handle.getURL();
+						String status = "Downloading: " + url.toString().substring(url.toString().lastIndexOf("/") + 1);
+						Frame.setStatus(status);
+						System.out.println("Downloading: " + url);
+						while (!handle.isComplete()) {
+							try {
+								Thread.sleep(10);
+							} catch (InterruptedException e) {
+								Frame.error("Who interupted the thread?");
+							}
+							Frame.setProgress((int) handle.getProgress());
 						}
-						Frame.setProgress((int) handle.getProgress());
 					}
-					if (handle.getStatus() == DownloadHandle.ERROR) {
-						JOptionPane.showMessageDialog(null, "Failed to get " + url);
-						handle.cancel();
-					}
-					handledHandles++;
-				}
-				ArrayList<DownloadHandle> chk = new ArrayList<>();
-				for (int i = 0; i < getHandles().size(); i++)
-					chk.add(getHandles().get(i));
-				frame.btnStart.setEnabled(false);
-				Frame.progressBar.setIndeterminate(true);
-				Frame.progressBar.setStringPainted(true);
-				Iterator<DownloadHandle> itChk = chk.iterator();
-				while (itChk.hasNext()) {
-					DownloadHandle current = itChk.next();
-					if (current.getStatus() == DownloadHandle.COMPLETE
-							|| current.getStatus() == DownloadHandle.CANCELLED) {
-						completed.add(current.getURL().toString());
-						current.runTag();
-						getHandles().remove(current);
-					}
-				}
-				if (handledHandles > 0) {
-					Frame.setStatus("Nothing is happening...");
-					Frame.setProgress(0);
-					frame.btnStart.setEnabled(true);
-					Frame.progressBar.setIndeterminate(false);
+					ArrayList<DownloadHandle> chk = new ArrayList<>();
+					for (int i = 0; i < getHandles().size(); i++)
+						chk.add(getHandles().get(i));
+					Frame.setStatus("Extracting..");
+					frame.btnStart.setEnabled(false);
+					Frame.progressBar.setIndeterminate(true);
 					Frame.progressBar.setStringPainted(false);
+					Iterator<DownloadHandle> itChk = chk.iterator();
+					while (itChk.hasNext()) {
+						DownloadHandle current = itChk.next();
+						if (current.isComplete()) {
+							completed.add(current.getURL().toString());
+							current.runTag();
+							getHandles().remove(current);
+						}
+					}
+					frame.btnStart.setEnabled(true);
+					Frame.progressBar.setString("All done!");
+					Frame.progressBar.setIndeterminate(false);
+					Frame.progressBar.setStringPainted(true);
+					Frame.setStatus("Done!");
+					Frame.setProgress(100);
 					System.out.println("Done!");
 				}
 			}
 		}
-
 	}
 }
