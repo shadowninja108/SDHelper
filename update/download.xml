@@ -1,53 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
    <general>
-      <name>Test File</name>
-      <author>shadowninja108</author>
-      <version>2</version>
+      <name>Plailect Guide 1/14/17</name>
+      <author>pietempgba</author>
+      <version>3</version>
       <binaryversion>2</binaryversion>
-      <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
+	  <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
    </general>
    <downloads>
       <global>
         <link type="zip">
-			<value>http://smealum.github.io/ninjhax2/starter.zip</value>
-			<path>/</path>
-			<extract>starter/</extract>
-		</link>
-		<link type = "direct">
-				<value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-n3ds.m4a?raw=true</value>
-				<path>soundhax.m4a</path>
-		</link>
-		<link type = "direct">
-			<value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.3dsx</value>
-			<path>3ds/safehax/safehax.3dsx</path>
-		</link>
-		<link type = "direct">
-			<value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.smdh</value>
-			<path>3ds/safehax/safehax.smdh</path>
-		</link>
-		<link type = "direct">
-			<value>https://github.com/nedwill/fasthax/releases/download/v1.0.1/fasthax.3dsx</value>
-			<path>3ds/fasthax/fasthax.3dsx</path>
-		</link>
-		<link type = "zip">
-			<value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
-			<path>safehaxpayload.bin</path>
-			<extract>Decrypt9WIP.bin</extract>
-		</link>
-		<link type="7zip">
-			<value>https://github.com/AuroraWright/Luma3DS/releases/download/v6.6/Luma3DSv6.6.7z</value>
-			<path>hax/arm9loaderhax.bin</path>
-			<extract>arm9loaderhax.bin</extract>
-		</link>
+            <value>http://smealum.github.io/ninjhax2/starter.zip</value>
+            <path>/</path>
+            <extract>starter/</extract>
+        </link>
+
+        <link type = "direct">
+            <value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.3dsx</value>
+            <path>3ds/safehax/safehax.3dsx</path>
+        </link>
+
+        <link type = "direct">
+            <value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.smdh</value>
+            <path>3ds/safehax/safehax.smdh</path>
+        </link>
+
+        <link type = "direct">
+            <value>https://github.com/nedwill/fasthax/releases/download/v1.0.1/fasthax.3dsx</value>
+            <path>3ds/fasthax/fasthax.3dsx</path>
+        </link>
+
+    <link type = "zip">
+            <value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
+            <path>safehaxpayload.bin</path>
+            <extract>Decrypt9WIP.bin</extract>
+        </link>
+
+    <link type = "zip">
+            <value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
+            <path>d9logo.bin</path>
+            <extract>d9logo.bin</extract>
+        </link>
+
+    <link type = "zip">
+      <value>https://github.com/yellows8/hblauncher_loader/releases/download/v1.2/hblauncher_loader_v1.2.zip</value>
+      <path>cias/hblauncher_loader.cia</path>
+        <extract>hblauncher_loader.cia</extract>
+      </link>
+
+      <link type = "direct">
+        <value>https://github.com/Steveice10/FBI/releases/download/2.4.7/FBI.cia</value>
+        <path>cias/FBI.cia</path>
+    </link>
+
+    <link type = "direct">
+      <value>https://github.com/Hamcha/lumaupdate/releases/download/v1.4.2/lumaupdater.cia</value>
+      <path>cias/lumaupdater.cia</path>
+    </link>
+
+      <link type = "zip">
+        <value>https://github.com/d0k3/GodMode9/releases/download/v0.9.2/GodMode9-20161226-172816.zip</value>
+        <path>luma/payloads/up_GodMode9.bin</path>
+      <extract>GodMode9.bin</extract>
+    </link>
+
+    <link type = "zip">
+      <value>https://github.com/d0k3/Hourglass9/releases/download/v1.35/Hourglass9-20161113-140904.zip</value>
+      <path>luma/payloads/start_Hourglass9.bin</path>
+    <extract>Hourglass9.bin</extract>
+  </link>
+
+  <link type = "direct">
+    <value>https://github.com/Cruel/DspDump/releases/download/1.0/DspDump.3dsx</value>
+    <path>3ds/DspDump.3dsx</path>
+  </link>
+
+  <link type = "zip">
+    <value>https://astronautlevel2.github.io/Luma3DS/builds/Luma-1eb18c17.zip</value>
+    <path>arm9loaderhax.bin</path>
+      <extract>out/arm9loaderhax.bin</extract>
+</link>
+
       </global>
-      <if type="NEW" region="USA">     
-         <command>        
+
+      <if type="NEW" region="USA">
+         <command>
             <link type = "direct">
-				<value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-n3ds.m4a?raw=true</value>
-				<path>soundhax.m4a</path>
-			</link>
+                <value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-n3ds.m4a?raw=true</value>
+                <path>soundhax-usa-n3ds.m4a</path>
+            </link>
          </command>
       </if>
+
+      <if type="OLD" region="USA">
+         <command>
+            <link type = "direct">
+                <value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-o3ds.m4a?raw=true</value>
+                <path>soundhax-usa-o3ds.m4a</path>
+            </link>
+         </command>
+      </if>
+
+      <if type="NEW" region="EUR">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-eur-n3ds.m4a?raw=true</value>
+        <path>soundhax-eur-n3ds.m4a</path>
+      </link>
+         </command>
+      </if>
+
+      <if type="OLD" region="EUR">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-eur-o3ds.m4a?raw=true</value>
+        <path>soundhax-eur-o3ds.m4a</path>
+      </link>
+         </command>
+      </if>
+
+      <if type="NEW" region="JPN">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-n3ds.m4a?raw=true</value>
+        <path>soundhax-jpn-n3ds.m4a</path>
+      </link>
+         </command>
+      </if>
+
+      <if type="OLD" region="JPN">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-o3ds.m4a?raw=true</value>
+        <path>soundhax-jpn-o3ds.m4a</path>
+      </link>
+         </command>
+      </if>
+
    </downloads>
 </root>

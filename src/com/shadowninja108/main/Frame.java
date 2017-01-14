@@ -145,7 +145,7 @@ public class Frame extends JFrame {
 				} else
 					System.out.println("Update site empty.");
 			} else
-				JOptionPane.showMessageDialog(null, "No download.xml detected!");
+				error("No download.xml detected!");
 		} catch (Exception e) {
 			error("Failed to check for updates! Reason: " + e.getMessage());
 		} finally {
@@ -327,10 +327,12 @@ public class Frame extends JFrame {
 					break;
 				case "KOR":
 					consoleInfo.region = region.KOR;
+					break;
 				case "TWN":
 					consoleInfo.region = region.TWN;
+					break;
 				default:
-					System.out.println("Region of 3DS undetermined! What the hell did you click?");
+					error("Region of 3DS undetermined! What the hell did you click?");
 					break;
 				}
 
