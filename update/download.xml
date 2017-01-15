@@ -3,9 +3,9 @@
    <general>
       <name>Plailect Guide 1/14/17</name>
       <author>pietempgba</author>
-      <version>3</version>
+      <version>4</version>
       <binaryversion>2</binaryversion>
-	  <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
+      <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
    </general>
    <downloads>
       <global>
@@ -14,37 +14,31 @@
             <path>/</path>
             <extract>starter/</extract>
         </link>
-
         <link type = "direct">
             <value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.3dsx</value>
             <path>3ds/safehax/safehax.3dsx</path>
         </link>
-
         <link type = "direct">
             <value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.smdh</value>
             <path>3ds/safehax/safehax.smdh</path>
         </link>
-
         <link type = "direct">
             <value>https://github.com/nedwill/fasthax/releases/download/v1.0.1/fasthax.3dsx</value>
             <path>3ds/fasthax/fasthax.3dsx</path>
-        </link>
-
-    <link type = "zip">
+        q</link>
+   	 <link type = "zip">
             <value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
             <path>safehaxpayload.bin</path>
             <extract>Decrypt9WIP.bin</extract>
         </link>
-
-    <link type = "zip">
+   	 <link type = "zip">
             <value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
             <path>d9logo.bin</path>
             <extract>d9logo.bin</extract>
         </link>
-
-    <link type = "zip">
-      <value>https://github.com/yellows8/hblauncher_loader/releases/download/v1.2/hblauncher_loader_v1.2.zip</value>
-      <path>cias/hblauncher_loader.cia</path>
+   	 <link type = "zip">
+    	  <value>https://github.com/yellows8/hblauncher_loader/releases/download/v1.2/hblauncher_loader_v1.2.zip</value>
+     	 <path>cias/hblauncher_loader.cia</path>
         <extract>hblauncher_loader.cia</extract>
       </link>
 
@@ -122,7 +116,7 @@
       <if type="NEW" region="JPN">
          <command>
             <link type = "direct">
-        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-n3ds.m4a?raw=true</value>
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-jpn-n3ds.m4a?raw=true</value>
         <path>soundhax-jpn-n3ds.m4a</path>
       </link>
          </command>
@@ -131,11 +125,46 @@
       <if type="OLD" region="JPN">
          <command>
             <link type = "direct">
-        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-usa-o3ds.m4a?raw=true</value>
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-jpn-o3ds.m4a?raw=true</value>
         <path>soundhax-jpn-o3ds.m4a</path>
       </link>
          </command>
       </if>
 
+      <if type="NEW" region="TWN">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-twn-n3ds.m4a?raw=true</value>
+        <path>soundhax-twn-n3ds.m4a</path>
+      </link>
+         </command>
+      </if>
+
+      <if type="OLD" region="TWN">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-twn-o3ds.m4a?raw=true</value>
+        <path>soundhax-twn-o3ds.m4a</path>
+      </link>
+         </command>
+      </if>
+
+      <if type="NEW" region="KOR">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-kor-n3ds.m4a?raw=true</value>
+        <path>soundhax-kor-n3ds.m4a</path>
+      </link>
+         </command>
+      </if>
+
+      <if type="OLD" region="KOR">
+         <command>
+            <link type = "direct">
+        <value>https://github.com/nedwill/soundhax/blob/master/soundhax-kor-o3ds.m4a?raw=true</value>
+        <path>soundhax-kor-o3ds.m4a</path>
+      </link>
+         </command>
+      </if>
    </downloads>
 </root>
