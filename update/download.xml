@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
    <general>
-      <name>Plailect Guide 1/14/17</name>
+      <name>Plailect's Guide 1/14/17</name>
       <author>pietempgba</author>
       <version>4</version>
       <binaryversion>2</binaryversion>
@@ -9,36 +9,43 @@
    </general>
    <downloads>
       <global>
+
         <link type="zip">
             <value>http://smealum.github.io/ninjhax2/starter.zip</value>
             <path>/</path>
             <extract>starter/</extract>
         </link>
+
         <link type = "direct">
             <value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.3dsx</value>
             <path>3ds/safehax/safehax.3dsx</path>
         </link>
+
         <link type = "direct">
             <value>https://github.com/TiniVi/safehax/releases/download/r18/safehax.smdh</value>
             <path>3ds/safehax/safehax.smdh</path>
         </link>
+
         <link type = "direct">
             <value>https://github.com/nedwill/fasthax/releases/download/v1.0.1/fasthax.3dsx</value>
             <path>3ds/fasthax/fasthax.3dsx</path>
-        q</link>
-   	 <link type = "zip">
+        </link>
+
+    <link type = "zip">
             <value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
             <path>safehaxpayload.bin</path>
             <extract>Decrypt9WIP.bin</extract>
         </link>
-   	 <link type = "zip">
+
+    <link type = "zip">
             <value>https://github.com/d0k3/Decrypt9WIP/releases/download/20161113/Decrypt9WIP-20161113-135126.zip</value>
             <path>d9logo.bin</path>
             <extract>d9logo.bin</extract>
         </link>
-   	 <link type = "zip">
-    	  <value>https://github.com/yellows8/hblauncher_loader/releases/download/v1.2/hblauncher_loader_v1.2.zip</value>
-     	 <path>cias/hblauncher_loader.cia</path>
+
+    <link type = "zip">
+      <value>https://github.com/yellows8/hblauncher_loader/releases/download/v1.2/hblauncher_loader_v1.2.zip</value>
+      <path>cias/hblauncher_loader.cia</path>
         <extract>hblauncher_loader.cia</extract>
       </link>
 
@@ -166,5 +173,6 @@
       </link>
          </command>
       </if>
+
    </downloads>
 </root>
