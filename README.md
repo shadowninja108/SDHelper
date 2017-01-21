@@ -19,11 +19,11 @@ This tool allows for automatic downloading of installer files. An XML file defin
   * Region
   * Version
   * Type (New/Old)
-  * Support for 7zip files
   
  * Support for downloading
   * Direct downloads
   * Zip files
+  * 7zip files
   * Web links (Opens in default browser)
   
 * Renaming of files downloaded
