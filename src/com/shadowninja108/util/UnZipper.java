@@ -5,18 +5,29 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.io.RandomAccessFile;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import com.shadowninja108.main.Frame;
+
+import net.sf.sevenzipjbinding.ExtractOperationResult;
+import net.sf.sevenzipjbinding.ISequentialOutStream;
+import net.sf.sevenzipjbinding.SevenZip;
+import net.sf.sevenzipjbinding.SevenZipException;
+import net.sf.sevenzipjbinding.impl.RandomAccessFileInStream;
+import net.sf.sevenzipjbinding.simple.ISimpleInArchive;
+import net.sf.sevenzipjbinding.simple.ISimpleInArchiveItem;
 
 public class UnZipper {
 
 	public static void unZip(File zipFile, File dir) {
 		int BUFFER = 2048;
 
+		System.out.println("Extracting: " + zipFile.getName());
 		ZipFile zip = null;
 		try {
 			zip = new ZipFile(zipFile);
@@ -63,6 +74,8 @@ public class UnZipper {
 		} catch (Exception e) {
 			Frame.error("Failed to extract zip: " + zipFile.getName());
 			e.printStackTrace();
+		} finally {
+			System.out.println("Extraction complete!");
 		}
 		try {
 			zip.close();
@@ -72,39 +85,60 @@ public class UnZipper {
 		}
 	}
 
-	public static void un7zip(File filePath, Path path) {
-		/*
-		 * RandomAccessFile randomAccessFile = null; IInArchive inArchive =
-		 * null; try { randomAccessFile = new RandomAccessFile(filePath, "r");
-		 * inArchive = SevenZip.openInArchive(null, new
-		 * RandomAccessFileInStream(randomAccessFile));
-		 * 
-		 * // Getting simple interface of the archive inArchive ISimpleInArchive
-		 * simpleInArchive = inArchive.getSimpleInterface();
-		 * 
-		 * System.out.println("   Hash   |    Size    | Filename");
-		 * System.out.println("----------+------------+---------");
-		 * 
-		 * for (ISimpleInArchiveItem item : simpleInArchive.getArchiveItems()) {
-		 * final int[] hash = new int[] { 0 }; if (!item.isFolder()) {
-		 * ExtractOperationResult result;
-		 * 
-		 * final long[] sizeArray = new long[1]; result = item.extractSlow(new
-		 * ISequentialOutStream() { public int write(byte[] data) throws
-		 * SevenZipException { hash[0] ^= Arrays.hashCode(data); sizeArray[0] +=
-		 * data.length; return data.length; } });
-		 * 
-		 * if (result == ExtractOperationResult.OK) {
-		 * System.out.println(String.format("%9X | %10s | %s", hash[0],
-		 * sizeArray[0], item.getPath())); } else {
-		 * System.err.println("Error extracting item: " + result); } } } } catch
-		 * (Exception e) { System.err.println("Error occurs: " + e); } finally {
-		 * if (inArchive != null) { try { inArchive.close(); } catch
-		 * (SevenZipException e) { System.err.println("Error closing archive: "
-		 * + e); } } if (randomAccessFile != null) { try {
-		 * randomAccessFile.close(); } catch (IOException e) {
-		 * System.err.println("Error closing file: " + e); } } }
-		 */
-	}
+	public static void un7zip(File filePath, File path) {
+		System.out.println("Extracting 7z: " + filePath.getName());
+		RandomAccessFile file = null;
+		RandomAccessFileInStream in = null;
+		ISimpleInArchive archive = null;
+		try {
+			file = new RandomAccessFile(filePath, "r");
+			in = new RandomAccessFileInStream(file);
+			archive = SevenZip.openInArchive(null, in).getSimpleInterface();
+			Iterator<ISimpleInArchiveItem> it = Arrays.asList(archive.getArchiveItems()).iterator();
+			while (it.hasNext()) {
+				ISimpleInArchiveItem item = it.next();
+				File dest = path.toPath().resolve(item.getPath()).toFile();
+				if (!item.isFolder()) {
+					if (!dest.exists())
+						dest.createNewFile();
+					final FileOutputStream fout = new FileOutputStream(dest);
 
+					ExtractOperationResult result = item.extractSlow(new ISequentialOutStream() {
+
+						@Override
+						public int write(byte[] data) throws SevenZipException {
+							try {
+								fout.write(data);
+							} catch (IOException e) {
+								Frame.error("Failed to write data!");
+							}
+							return data.length;
+						}
+					});
+					if (result != ExtractOperationResult.OK) {
+						Frame.error("Failed to extract: " + item.getPath());
+					}
+					fout.close();
+				} else
+					dest.mkdirs();
+			}
+
+		} catch (
+
+		IOException e) {
+			Frame.error("Error occured extracting 7zip file: " + filePath.getName());
+			e.printStackTrace();
+		} finally {
+			try {
+				archive.close();
+				in.close();
+				file.close();
+			} catch (IOException e) {
+				Frame.error("Failed to close: " + filePath.getName() + "!\nPANIC PANIC");
+				e.printStackTrace();
+			} finally {
+				System.out.println("Extraction complete!");
+			}
+		}
+	}
 }

@@ -3,8 +3,8 @@
    <general>
       <name>Plailect's Guide 1/14/17</name>
       <author>pietempgba</author>
-      <version>4</version>
-      <binaryversion>2</binaryversion>
+      <version>5</version>
+      <binaryversion>3</binaryversion>
       <updatesite>https://raw.githubusercontent.com/shadowninja108/SDHelper/master/update/update.xml</updatesite>
    </general>
    <downloads>
@@ -75,13 +75,26 @@
     <value>https://github.com/Cruel/DspDump/releases/download/1.0/DspDump.3dsx</value>
     <path>3ds/DspDump.3dsx</path>
   </link>
-
-  <link type = "zip">
-    <value>https://astronautlevel2.github.io/Luma3DS/builds/Luma-1eb18c17.zip</value>
-    <path>arm9loaderhax.bin</path>
-      <extract>out/arm9loaderhax.bin</extract>
+<link type= "7zip">
+	<value>https://github.com/Plailect/SafeA9LHInstaller/releases/download/v2.0.6/SafeA9LHInstallerv2.0.6.7z</value>
+    <path>arm9.bin</path>
+      <extract>arm9.bin</extract>
 </link>
-
+<link type= "7zip">
+	<value>https://github.com/Plailect/SafeA9LHInstaller/releases/download/v2.0.6/SafeA9LHInstallerv2.0.6.7z</value>
+    <path>arm11.bin</path>
+      <extract>arm11.bin</extract>
+</link>
+<link type= "7zip">
+	<value>https://github.com/AuroraWright/arm9loaderhax/releases/download/17%2F10/release.7z</value>
+    <path>/a9lh</path>
+      <extract>/</extract>
+</link>
+<link type= "7zip">
+	<value>https://github.com/AuroraWright/Luma3DS/releases/download/v6.6/Luma3DSv6.6.7z</value>
+    <path>/arm9loaderhax.bin</path>
+      <extract>/arm9loaderhax.bin</extract>
+</link>
       </global>
 
       <if type="NEW" region="USA">
@@ -173,6 +186,5 @@
       </link>
          </command>
       </if>
-
    </downloads>
 </root>

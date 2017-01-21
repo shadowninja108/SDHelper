@@ -24,7 +24,7 @@ import org.jdom2.input.SAXBuilder;
 import com.shadowninja108.info.ConsoleInfo;
 import com.shadowninja108.main.Frame;
 import com.shadowninja108.util.DownloadManager;
-import com.shadowninja108.util.ExtractionTag;
+import com.shadowninja108.util.ActionTag;
 import com.shadowninja108.util.UnZipper;
 
 public class Interpreter {
@@ -55,13 +55,10 @@ public class Interpreter {
 
 	public int version;
 
-	private ConsoleInfo info;
-
 	public DownloadManager downManager;
 
-	public Interpreter(File xml, ConsoleInfo info, Frame frame) {
+	public Interpreter(File xml, Frame frame) {
 		setup();
-		this.info = info;
 
 		downManager = new DownloadManager(frame);
 
@@ -105,7 +102,7 @@ public class Interpreter {
 		return buffer;
 	}
 
-	public void interpret() {
+	public void interpret(ConsoleInfo info) {
 		Iterator<Element> it = downloads.getChildren().iterator();
 		while (it.hasNext()) {
 			Element current = it.next();
@@ -122,7 +119,7 @@ public class Interpreter {
 				if (current.getAttribute("region") != null
 						&& !current.getAttributeValue("region").equals(info.region.toString()))
 					verified = false;
-				if (current.getChild("version") != null && !checkVersion(current.getChild("version")))
+				if (current.getChild("version") != null && !checkVersion(current.getChild("version"), info))
 					verified = false;
 				if (verified)
 					interpretCommands(current.getChild("command"));
@@ -133,12 +130,12 @@ public class Interpreter {
 		}
 	}
 
-	public boolean checkVersion(Element node) {
+	public boolean checkVersion(Element node, ConsoleInfo info) {
 		if (node != null) {
 			String from = node.getChildText("from");
 			String to = node.getChildText("to");
 			// version parsing ignores everything but the last number. yea i
-			// know its bad
+			// know its bad. pls fix
 
 			if ((to == null || to.isEmpty()) && (from != null && !from.isEmpty())) {
 				return Integer.parseInt(node.getChild("from").getChildText("idk")) == info.ver.idk;
@@ -154,23 +151,35 @@ public class Interpreter {
 	}
 
 	public void interpretCommands(Element node) {
+		downManager.stopQue = true;
 		Iterator<Element> it = node.getChildren().iterator();
 		while (it.hasNext()) {
 			Element current = it.next();
 			if (current.hasAttributes()) {
 				Iterator<Attribute> at = current.getAttributes().iterator();
 				System.out.println("Executing command: " + current.getName());
+				String webSite;
+				String srcName;
+				File filePath;
 				while (at.hasNext()) {
 					Attribute currentAt = at.next();
 					switch (currentAt.getValue()) {
 					case "zip":
-						decompressZip(current, null);
+						webSite = current.getChildText("value");
+						srcName = webSite.substring(webSite.lastIndexOf("/") + 1, webSite.lastIndexOf("."));
+						filePath = new File(download, srcName + ".zip");
+						downManager.tags.add(ActionTag.makeTag("decompressZip", current, this));
+						directDownload(current, filePath);
 						break;
 					case "7zip":
-						// decompress7z(current, null);
+						webSite = current.getChildText("value");
+						srcName = webSite.substring(webSite.lastIndexOf("/") + 1, webSite.lastIndexOf("."));
+						filePath = new File(download, srcName + ".7z");
+						downManager.tags.add(ActionTag.makeTag("decompress7z", current, this));
+						directDownload(current, filePath);
 						break;
 					case "direct":
-						directDownload(current);
+						directDownload(current, new File(sd, current.getChildText("path")));
 						break;
 					case "web":
 						webLink(current);
@@ -179,9 +188,10 @@ public class Interpreter {
 				}
 			}
 		}
+		downManager.stopQue = false;
 	}
 
-	public void decompressZip(Element node, ExtractionTag tag) {
+	public void decompressZip(Element node) {
 		String webSite = node.getChildText("value");
 		String path = node.getChildText("path");
 		String extract = node.getChildText("extract");
@@ -189,26 +199,78 @@ public class Interpreter {
 		File filePath = new File(download, srcName + ".zip");
 		File rootFolderPath = new File(download, srcName);
 		File extractPath = (!extract.equals("/")) ? sd : new File(sd, extract);
-		if ((tag != null && !tag.completed) || (rootFolderPath.exists())) {
-			rootFolderPath.mkdir();
+		rootFolderPath.mkdir();
+		File source = new File(rootFolderPath, extract);
+		if (!source.exists())
+			UnZipper.unZip(filePath, rootFolderPath);
+		File destination = null;
+		if (source.isFile()) {
+			destination = new File(sd, path);
+			try {
+				destination.mkdirs();
+				destination.createNewFile();
+				System.out.println("Copying: " + source.getName());
+				Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				Frame.error("Failed to prepare/move " + source.getName());
+			}
+		} else {
+			if (!path.equals("/"))
+				destination = new File(sd, path);
+			else
+				destination = sd;
+			try {
+				final File fSrc = source;
+				final File fDest = extractPath;
+				// java 7 compatibility requires these to be final
+				Files.walkFileTree(fSrc.toPath(), new SimpleFileVisitor<Path>() {
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						return copy(file);
+					}
+
+					private FileVisitResult copy(Path fileOrDir) throws IOException {
+						Path finl = fDest.toPath().resolve(fSrc.toPath().relativize(fileOrDir));
+						// get around exceptions
+						finl.toFile().mkdirs();
+						System.out.println("Moving: " + fileOrDir.getFileName());
+						Files.copy(fileOrDir, fDest.toPath().resolve(fSrc.toPath().relativize(fileOrDir)),
+								StandardCopyOption.REPLACE_EXISTING);
+						return FileVisitResult.CONTINUE;
+					}
+				});
+			} catch (IOException e) {
+				Frame.error("Failed to recursively move: " + extractPath.getName());
+			}
+		}
+	}
+
+	public void decompress7z(Element node) {
+		if (Frame.sevenZipEnabled) {
+			String webSite = node.getChildText("value");
+			String path = node.getChildText("path");
+			String extract = node.getChildText("extract");
+			String srcName = webSite.substring(webSite.lastIndexOf("/") + 1, webSite.lastIndexOf("."));
+			File filePath = new File(download, srcName + ".7z");
+			File rootFolderPath = new File(download, srcName);
+			File extractPath = (!extract.equals("/")) ? sd : new File(sd, path);
 			File source = new File(rootFolderPath, extract);
-			if (!source.exists())
-				UnZipper.unZip(filePath, rootFolderPath);
+			if (!rootFolderPath.exists()) {
+				rootFolderPath.mkdirs();
+				UnZipper.un7zip(filePath, rootFolderPath);
+			}
 			File destination = null;
 			if (source.isFile()) {
 				destination = new File(sd, path);
 				try {
 					destination.mkdirs();
 					destination.createNewFile();
+					System.out.println("Copying: " + source.getName());
 					Files.copy(source.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e) {
 					Frame.error("Failed to prepare/move " + source.getName());
 				}
 			} else {
-				if (!path.equals("/"))
-					destination = new File(sd, path);
-				else
-					destination = sd;
+				destination = (!path.equals("/")) ? sd : new File(sd, path);
 				try {
 					final File fSrc = source;
 					final File fDest = extractPath;
@@ -222,7 +284,8 @@ public class Interpreter {
 							Path finl = fDest.toPath().resolve(fSrc.toPath().relativize(fileOrDir));
 							// get around exceptions
 							finl.toFile().mkdirs();
-							Files.move(fileOrDir, fDest.toPath().resolve(fSrc.toPath().relativize(fileOrDir)),
+							System.out.println("Copying: " + fileOrDir.getFileName());
+							Files.copy(fileOrDir, fDest.toPath().resolve(fSrc.toPath().relativize(fileOrDir)),
 									StandardCopyOption.REPLACE_EXISTING);
 							return FileVisitResult.CONTINUE;
 						}
@@ -231,72 +294,21 @@ public class Interpreter {
 					Frame.error("Failed to recursively move: " + extractPath.getName());
 				}
 			}
-		} else {
-			try {
-				filePath.createNewFile();
-			} catch (IOException e) {
-				System.out.println("Error!");
-			}
-			ExtractionTag ntag = new ExtractionTag();
-			try {
-				ntag.m = this.getClass().getMethod("decompressZip",
-						new Class<?>[] { Element.class, ExtractionTag.class });
-			} catch (NoSuchMethodException | SecurityException e) {
-				e.printStackTrace();
-			}
-			ntag.completed = false;
-			ntag.node = node;
-			ntag.interpreter = this;
-			downManager.download(webSite, filePath, ntag);
-		}
+
+		} else
+			System.out.println("7zip disabled. Skipping...");
 	}
 
-	public void decompress7z(Element node, ExtractionTag tag) {
-		System.out.println("7zip support unimplimented! Skipping...");
-		/*
-		 * String web = node.getChildText("value"); String path =
-		 * web.substring(web.lastIndexOf("/") + 1, web.lastIndexOf(".")); File
-		 * filePath = new File(download, path + ".7z"); File folderPath =
-		 * Paths.get(download.toString(), path).toFile(); if ((tag != null &&
-		 * !tag.completed) || (folderPath.exists()) && Frame.sevenZipEnabled) {
-		 * folderPath.mkdir(); File source = new File(download, path +
-		 * "\\" + node.getChildText("extract")); if (!source.exists())
-		 * UnZipper.un7zip(filePath, new File(download, path).toPath()); File
-		 * destination = null; if (source.isFile()) { destination = new File(sd,
-		 * node.getChildText("path")); try { destination.mkdirs();
-		 * destination.createNewFile(); Files.copy(source.toPath(),
-		 * destination.toPath(), StandardCopyOption.REPLACE_EXISTING); } catch
-		 * (IOException e) { e.printStackTrace(); } } else { File dest; if
-		 * (!node.getChildText("path").equals("/")) dest = new File(sd,
-		 * node.getChildText("path")); else dest = sd; try {
-		 * Files.walkFileTree(source.toPath(), new SimpleFileVisitor<Path>() {
-		 * public FileVisitResult visitFile(Path file, BasicFileAttributes
-		 * attrs) throws IOException { return copy(file); }
-		 * 
-		 * private FileVisitResult copy(Path fileOrDir) throws IOException {
-		 * Path finl =
-		 * dest.toPath().resolve(source.toPath().relativize(fileOrDir)); // get
-		 * around exceptions finl.toFile().mkdirs(); Files.move(fileOrDir,
-		 * dest.toPath().resolve(source.toPath().relativize(fileOrDir)),
-		 * StandardCopyOption.REPLACE_EXISTING); return
-		 * FileVisitResult.CONTINUE; } }); } catch (IOException e) {
-		 * e.printStackTrace(); } } } if (!Frame.sevenZipEnabled) { System.out.
-		 * println("Skipped 7z because of the inability to extract it"); } else
-		 * { try { filePath.createNewFile(); } catch (IOException e) {
-		 * System.out.println("Error!"); } ExtractionTag ntag = new
-		 * ExtractionTag(); try { ntag.m =
-		 * this.getClass().getMethod("decompress7z", new Class<?>[] {
-		 * Element.class, ExtractionTag.class }); } catch (NoSuchMethodException
-		 * | SecurityException e) { e.printStackTrace(); } ntag.completed =
-		 * false; ntag.node = node; ntag.interpreter = this;
-		 * downManager.download(web, "/download/" + path + ".zip", ntag); }
-		 */
-	}
-
-	public void directDownload(Element node) {
+	public void directDownload(Element node, File file) {
 		String webSite = node.getChildText("value");
-		String path = node.getChildText("path");
-		downManager.download(webSite, new File(sd, path), null);
+		try {
+			if (file.isFile())
+				file.createNewFile();
+		} catch (IOException e) {
+			Frame.error("Failed to create file: " + file.getName());
+			e.printStackTrace();
+		}
+		downManager.download(webSite, file);
 	}
 
 	public void webLink(Element node) {
@@ -305,10 +317,6 @@ public class Interpreter {
 		} catch (IOException | URISyntaxException e) {
 			Frame.error("Failed to open " + node.getChildText("value"));
 		}
-	}
-
-	public Interpreter getInstance() {
-		return this;
 	}
 
 	public void dispose() {

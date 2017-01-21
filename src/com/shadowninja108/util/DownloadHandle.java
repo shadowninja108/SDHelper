@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Observable;
@@ -21,14 +20,10 @@ public class DownloadHandle extends Observable implements Runnable {
 	private long downloaded;
 	private boolean complete = false;
 
-	public ExtractionTag tag;
-
 	// Constructor for Download.
-	public DownloadHandle(URL url, File path, ExtractionTag tag) {
+	public DownloadHandle(URL url, File path) {
 		this.url = url;
 		this.path = path;
-		if (tag != null)
-			this.tag = tag;
 		if (!this.path.exists())
 			this.path.getParentFile().mkdirs();
 		try {
@@ -39,17 +34,6 @@ public class DownloadHandle extends Observable implements Runnable {
 		size = -1;
 		downloaded = 0;
 		download();
-	}
-
-	public void runTag() {
-		if (tag != null)
-			try {
-				tag.m.invoke(tag.interpreter, new Object[] { tag.node, tag });
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				e.printStackTrace();
-			} finally {
-				tag.completed = true;
-			}
 	}
 
 	public URL getURL() {
@@ -94,7 +78,7 @@ public class DownloadHandle extends Observable implements Runnable {
 				downloaded = out.getProgress();
 			}
 		} catch (IOException e) {
-			Frame.error("Frame.error occured downloading: " + path.getName() + "!");
+			Frame.error("Error occured downloading: " + path.getName() + "!");
 			e.printStackTrace();
 		} finally {
 			try {

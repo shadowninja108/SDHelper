@@ -1,6 +1,7 @@
 package com.shadowninja108.util;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -10,25 +11,24 @@ import java.util.function.Consumer;
 import com.shadowninja108.main.Frame;
 
 public class DownloadManager {
-
-	public Frame frame;
-
 	public FileDownloaderThread thread;
 
 	public ArrayList<DownloadHandle> toBeAdded;
 	public ArrayList<DownloadHandle> handles;
-	public ArrayList<String> completed;
+
+	public ArrayList<ActionTag> tags;
 
 	public int status = 0;
 
 	public boolean running = false;
 
+	public boolean stopQue = false;
+
 	public DownloadManager(Frame frame) {
 		running = true;
-		completed = new ArrayList<>();
-		handles = new ArrayList<DownloadHandle>();
-		toBeAdded = new ArrayList<DownloadHandle>();
-		this.frame = frame;
+		tags = new ArrayList<>();
+		handles = new ArrayList<>();
+		toBeAdded = new ArrayList<>();
 		thread = new FileDownloaderThread();
 		thread.start();
 	}
@@ -59,15 +59,12 @@ public class DownloadManager {
 				e.printStackTrace();
 			}
 		}
-		Frame.setStatus("Extracting...");
-		Frame.progressBar.setStringPainted(false);
-		Frame.progressBar.setIndeterminate(true);
 		return true;
 	}
 
-	public void download(String web, File path, ExtractionTag tag) {
+	public void download(String web, File path) {
 		try {
-			toBeAdded.add(new DownloadHandle(new URL(web), path, tag));
+			toBeAdded.add(new DownloadHandle(new URL(web), path));
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -94,7 +91,7 @@ public class DownloadManager {
 		@Override
 		public void run() {
 			while (running) {
-				while (getHandles().size() > 0 || getTBHandles().size() > 0) {
+				while ((getHandles().size() > 0 || getTBHandles().size() > 0) && !stopQue) {
 					try {
 						Thread.sleep(10);
 					} catch (InterruptedException e1) {
@@ -126,28 +123,36 @@ public class DownloadManager {
 							Frame.setProgress((int) handle.getProgress());
 						}
 					}
-					ArrayList<DownloadHandle> chk = new ArrayList<>();
-					for (int i = 0; i < getHandles().size(); i++)
-						chk.add(getHandles().get(i));
-					Frame.setStatus("Extracting..");
-					frame.btnStart.setEnabled(false);
-					Frame.progressBar.setIndeterminate(true);
-					Frame.progressBar.setStringPainted(false);
-					Iterator<DownloadHandle> itChk = chk.iterator();
-					while (itChk.hasNext()) {
-						DownloadHandle current = itChk.next();
-						if (current.isComplete()) {
-							completed.add(current.getURL().toString());
-							current.runTag();
-							getHandles().remove(current);
-						}
+
+					if (!tags.isEmpty()) {
+						Frame.setStatus("Extracting..");
+						Frame.btnStart.setEnabled(false);
+						Frame.progressBar.setIndeterminate(true);
+						Frame.progressBar.setStringPainted(false);
+
+						Iterator<ActionTag> itTags = tags.iterator();
+						itTags.forEachRemaining(new Consumer<ActionTag>() {
+							@Override
+							public void accept(ActionTag tag) {
+								try {
+									tag.m.invoke(tag.interpreter, new Object[] { tag.node });
+								} catch (IllegalAccessException | IllegalArgumentException
+										| InvocationTargetException e) {
+									Frame.error("Failed to invoke method: " + tag.m.getName() + "! PANIC PANIC");
+									e.printStackTrace();
+								}
+							}
+						});
 					}
-					frame.btnStart.setEnabled(true);
-					Frame.progressBar.setString("All done!");
+					tags.clear();
+					handles.clear();
+
+					Frame.btnStart.setEnabled(true);
 					Frame.progressBar.setIndeterminate(false);
 					Frame.progressBar.setStringPainted(true);
 					Frame.setStatus("Done!");
 					Frame.setProgress(100);
+					Frame.progressBar.setString("All done!");
 					System.out.println("Done!");
 				}
 			}

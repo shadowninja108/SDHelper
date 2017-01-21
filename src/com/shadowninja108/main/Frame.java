@@ -25,6 +25,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import org.jdom2.Document;
@@ -37,10 +38,13 @@ import com.shadowninja108.info.ConsoleInfo.type;
 import com.shadowninja108.interpret.Interpreter;
 import com.shadowninja108.util.DownloadHandle;
 
+import net.sf.sevenzipjbinding.SevenZip;
+import net.sf.sevenzipjbinding.SevenZipNativeInitializationException;
+
 public class Frame extends JFrame {
 
 	public final static File working_directory = Paths.get(".").toAbsolutePath().toFile();
-	public final static int binary_version = 2;
+	public final static int binary_version = 3;
 
 	/**
 	 * 
@@ -49,7 +53,7 @@ public class Frame extends JFrame {
 	private JPanel contentPane;
 	public ConsoleInfo consoleInfo;
 	private final Action action = new StartAction();
-	public JButton btnStart;
+	public static JButton btnStart;
 	private JSpinner verMajor;
 	private JSpinner verMinor;
 	private JSpinner verPatch;
@@ -62,19 +66,26 @@ public class Frame extends JFrame {
 	private Interpreter interpreter;
 	private Frame frame;
 	public static boolean sevenZipEnabled;
+	private final Action action_1 = new InfoAction();
+	public static JButton btnInfoButton;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		/*
-		 * sevenZipEnabled = true; try { SevenZip.initSevenZipFromPlatformJAR();
-		 * System.out.println("7zip library initialized!"); } catch
-		 * (SevenZipNativeInitializationException e1) { System.out.
-		 * println("7zip library failed to initialize! 7zip compatibility disabled!"
-		 * );
-		 */sevenZipEnabled = false;
-		// }
+
+		sevenZipEnabled = true;
+		try {
+			SevenZip.initSevenZipFromPlatformJAR();
+			System.out.println("7zip library initialized!");
+		} catch (SevenZipNativeInitializationException e1) {
+			error("7zip library failed to initialize! 7zip compatibility disabled!");
+			sevenZipEnabled = false;
+		} catch (RuntimeException e2) {
+			error("7zip library failed to extract!\n7zip compatibility disabled.\nIs there another instance of SDHelper running?");
+			e2.printStackTrace();
+			sevenZipEnabled = false;
+		}
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -113,12 +124,11 @@ public class Frame extends JFrame {
 				if (url != "" || url != null) {
 					if (!url.equals("") || !url.equals(null)) {
 						System.out.println("Downloading update xml...");
-						DownloadHandle handle = new DownloadHandle(new URL(url), updateXml, null);
+						DownloadHandle handle = new DownloadHandle(new URL(url), updateXml);
 						handle.run();
 						while (!handle.isComplete())
 							Thread.sleep(10);
-						SAXBuilder updateBuilder = new SAXBuilder();
-						Document updateDoc = updateBuilder.build(updateXml);
+						Document updateDoc = builder.build(updateXml);
 						Element updateRoot = updateDoc.getRootElement();
 						int newVer = Integer.parseInt(updateRoot.getChild("general").getChildText("version"));
 						if (newVer > ver) {
@@ -131,11 +141,15 @@ public class Frame extends JFrame {
 								URL nUrl = new URL(uURL);
 								downloadXml.delete();
 								System.out.println("Downloading: " + nUrl.getFile());
-								DownloadHandle nhandle = new DownloadHandle(nUrl, downloadXml, null);
+								DownloadHandle nhandle = new DownloadHandle(nUrl, downloadXml);
 								nhandle.run();
 								while (!nhandle.isComplete())
 									Thread.sleep(10);
 								updateXml.delete();
+								Document updatedDoc = builder.build(downloadXml);
+								Element updatedRoot = updatedDoc.getRootElement();
+								lblXMLAuthor.setText(
+										"XML Author: " + updatedRoot.getChild("general").getChildText("author"));
 								System.out.println("Update complete!");
 							}
 						} else
@@ -155,6 +169,7 @@ public class Frame extends JFrame {
 				error("Failed to delete update.xml!");
 			}
 		}
+		interpreter = new Interpreter(new File(working_directory, "download.xml"), frame);
 
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -198,7 +213,8 @@ public class Frame extends JFrame {
 		verMajor.setModel(new SpinnerNumberModel(new Integer(11), null, null, new Integer(1)));
 
 		JLabel label = new JLabel(".");
-		label.setBounds(40, 61, 10, 14);
+		label.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		label.setBounds(40, 55, 10, 14);
 		verPanel.add(label);
 
 		verMinor = new JSpinner();
@@ -208,7 +224,8 @@ public class Frame extends JFrame {
 		verMinor.setModel(new SpinnerNumberModel(new Integer(2), null, null, new Integer(1)));
 
 		JLabel label_1 = new JLabel(".");
-		label_1.setBounds(91, 61, 10, 14);
+		label_1.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		label_1.setBounds(85, 55, 10, 14);
 		verPanel.add(label_1);
 
 		verPatch = new JSpinner();
@@ -217,6 +234,7 @@ public class Frame extends JFrame {
 		verPatch.setFont(new Font("Tahoma", Font.BOLD, 11));
 
 		JLabel label_2 = new JLabel("-");
+		label_2.setFont(new Font("Tahoma", Font.PLAIN, 19));
 		label_2.setBounds(144, 43, 10, 14);
 		verPanel.add(label_2);
 
@@ -271,6 +289,16 @@ public class Frame extends JFrame {
 		statusPanel.add(lblStatus);
 		lblStatus.setHorizontalAlignment(SwingConstants.CENTER);
 
+		btnInfoButton = new JButton();
+		btnInfoButton.setAction(action_1);
+		btnInfoButton.setIcon(UIManager.getIcon("OptionPane.informationIcon"));
+		btnInfoButton.setBorderPainted(false);
+		btnInfoButton.setContentAreaFilled(false);
+		btnInfoButton.setFocusPainted(false);
+		btnInfoButton.setOpaque(false);
+		btnInfoButton.setBounds(0, 0, 40, 40);
+		statusPanel.add(btnInfoButton);
+
 		JLabel lblToolAuthor = new JLabel("Tool Author: shadowninja108");
 		sl_contentPane.putConstraint(SpringLayout.NORTH, lblToolAuthor, 0, SpringLayout.NORTH, contentPane);
 		sl_contentPane.putConstraint(SpringLayout.WEST, lblToolAuthor, 0, SpringLayout.WEST, contentPane);
@@ -308,55 +336,53 @@ public class Frame extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			btnStart.setEnabled(false);
-			if (consoleInfo == null) {
-				consoleInfo = new ConsoleInfo();
-				getConsoleInfo().ver.major = (int) verMajor.getValue();
-				getConsoleInfo().ver.minor = (int) verMinor.getValue();
-				getConsoleInfo().ver.patch = (int) verPatch.getValue();
-				getConsoleInfo().ver.idk = (int) verIDK.getValue();
+			consoleInfo = new ConsoleInfo();
+			getConsoleInfo().ver.major = (int) verMajor.getValue();
+			getConsoleInfo().ver.minor = (int) verMinor.getValue();
+			getConsoleInfo().ver.patch = (int) verPatch.getValue();
+			getConsoleInfo().ver.idk = (int) verIDK.getValue();
 
-				switch ((String) comboRegion.getSelectedItem()) {
-				case "USA":
-					consoleInfo.region = region.USA;
-					break;
-				case "EUR":
-					consoleInfo.region = region.EUR;
-					break;
-				case "JPN":
-					consoleInfo.region = region.JPN;
-					break;
-				case "KOR":
-					consoleInfo.region = region.KOR;
-					break;
-				case "TWN":
-					consoleInfo.region = region.TWN;
-					break;
-				default:
-					error("Region of 3DS undetermined! What the hell did you click?");
-					break;
-				}
-
-				if (((String) comboType.getSelectedItem()).startsWith("New"))
-					consoleInfo.type = type.NEW;
-				else if (((String) comboType.getSelectedItem()).startsWith("3DS"))
-					consoleInfo.type = type.OLD;
-				else
-					error("Type of 3DS undetermined! What the hell did you click?");
+			switch ((String) comboRegion.getSelectedItem()) {
+			case "USA":
+				consoleInfo.region = region.USA;
+				break;
+			case "EUR":
+				consoleInfo.region = region.EUR;
+				break;
+			case "JPN":
+				consoleInfo.region = region.JPN;
+				break;
+			case "KOR":
+				consoleInfo.region = region.KOR;
+				break;
+			case "TWN":
+				consoleInfo.region = region.TWN;
+				break;
+			default:
+				error("Region of 3DS undetermined! What the hell did you click?");
+				break;
 			}
-			if (interpreter == null)
-				interpreter = new Interpreter(new File(working_directory, "download.xml"), consoleInfo, frame);
+
+			if (((String) comboType.getSelectedItem()).startsWith("New"))
+				consoleInfo.type = type.NEW;
+			else if (((String) comboType.getSelectedItem()).startsWith("3DS"))
+				consoleInfo.type = type.OLD;
+			else
+				error("Type of 3DS undetermined! What the hell did you click?");
+
 			progressBar.setStringPainted(true);
-			interpreter.interpret();
+			interpreter.interpret(consoleInfo);
 		}
 	}
 
 	public static void setStatus(String status) {
 		lblStatus.setText(status);
-		lblStatus.paintImmediately(lblStatus.getVisibleRect());
+		lblStatus.repaint();
 	}
 
 	public static void setProgress(int progress) {
 		progressBar.setValue(progress);
+		progressBar.setString(progress + "%");
 		progressBar.repaint();
 	}
 
@@ -366,5 +392,23 @@ public class Frame extends JFrame {
 
 	public static void error(String message) {
 		JOptionPane.showMessageDialog(null, message);
+	}
+
+	private class InfoAction extends AbstractAction {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8378317838510159280L;
+
+		public InfoAction() {
+			putValue(NAME, "");
+			putValue(SHORT_DESCRIPTION, "View information");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			JOptionPane.showMessageDialog(frame,
+					"This tool allows for quick and easy download/extraction\nof files off the internet.\nBinary version: "
+							+ binary_version + "\nXML Version: " + interpreter.version);
+		}
 	}
 }
