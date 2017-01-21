@@ -19,6 +19,7 @@ This tool allows for automatic downloading of installer files. An XML file defin
   * Region
   * Version
   * Type (New/Old)
+  * Support for 7zip files
   
  * Support for downloading
   * Direct downloads
@@ -29,13 +30,11 @@ This tool allows for automatic downloading of installer files. An XML file defin
 * Little error handling (Yay)
 
 # Release Goals
-* Support for 7zip files
 * Error handling (cuz its important)
 * GUI Enhancements
   * Allow for user input to be used for if statements
 * Better if statements
   * Handle multiple regions in one statement
-* Clean up download manager
 
 # Future Goals
 * Even more GUI stuff!
